@@ -11,7 +11,7 @@ engine::engine(int _w, int _h)
 
     renderer = SDL_CreateRenderer(window, -1, 0);
 
-    tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888,
+    tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                             SDL_TEXTUREACCESS_STATIC, width, height);
     memset(pixels, 0, width * height * sizeof(uint32_t));
 }
@@ -25,12 +25,12 @@ engine::~engine()
     SDL_Quit();
 }
 
-void engine::update(void (*handle_Input)(SDL_Event &, bool &))
+void engine::update(void (*handle_Input)(SDL_Event &, bool &), void (*copyTex)())
 {
-    SDL_UpdateTexture(tex, NULL, pixels, width * sizeof(uint32_t));
-    SDL_WaitEvent(&event);
-
     handle_Input(event, running);
+    copyTex();
+
+    SDL_UpdateTexture(tex, NULL, pixels, width * sizeof(uint32_t));
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, tex, NULL, NULL);

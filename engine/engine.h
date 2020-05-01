@@ -16,10 +16,11 @@ public:
     SDL_Event event;
     uint32_t *pixels;
     bool running = true;
+    bool Shouldupdate = true;
 
 public:
     engine(int _w, int _h);
-    void update(void (*handle_Input)(SDL_Event &, bool &));
+    void update(void (*handle_Input)(SDL_Event &, bool &), void (*copyTex)());
     ~engine();
 };
 
