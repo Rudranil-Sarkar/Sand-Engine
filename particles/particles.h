@@ -8,7 +8,6 @@ struct particle
     uint32_t id;
     int vel;
     int acc;
-    int flowrate;
 };
 
 enum par_id

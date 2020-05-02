@@ -7,7 +7,10 @@ Uint64 NOW = SDL_GetPerformanceCounter();
 Uint64 LAST = 0;
 double dt = 0;
 
-world_data w(640, 480);
+int width = 1280;
+int height = 720;
+
+world_data w(width, height);
 
 bool leftMouseButtonDown;
 int mouseX;
@@ -38,29 +41,30 @@ void handle_Input(SDL_Event &event, bool &running)
     }
 }
 
-engine *e = new engine(640, 480);
+engine *e = new engine(width, height);
 void copyTex()
 {
 
-    for (int i = 0; i < 480; i++)
+    for (int i = 0; i < height; i++)
     {
-        for (int j = 0; j < 640; j++)
+        for (int j = 0; j < width; j++)
         {
-            e->pixels[j + i * 640] = w.readParticle(j, i).id;
+            e->pixels[j + i * width] = w.readParticle(j, i).id;
         }
     }
 }
 
 void updatesand(int x, int y, world_data &w)
 {
-    if (x >= 640 || y >= 480)
+    if (x >= width || y >= height)
         return;
 
     particle this_particle = w.readParticle(x, y);
     particle below = w.readParticle(x, y + 1);
 
     this_particle.acc = e->gravity;
-    this_particle.vel += this_particle.acc * dt / 2;
+    if (this_particle.vel < 10)
+        this_particle.vel += this_particle.acc * dt / 2;
     if (below.id == empty_id)
     {
         int prevx = x;
@@ -70,7 +74,7 @@ void updatesand(int x, int y, world_data &w)
             if (w.readParticle(x, y + i).id != 0)
                 break;
 
-            if (x + i >= 640 || y + i >= 480)
+            if (x + i >= width || y + i >= height)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
@@ -92,7 +96,7 @@ void updatesand(int x, int y, world_data &w)
             if (w.readParticle(x - i, y + i).id != 0)
                 break;
 
-            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+            if (x + i >= width || y + i >= height || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
@@ -114,7 +118,7 @@ void updatesand(int x, int y, world_data &w)
             if (w.readParticle(x + i, y + i).id != empty_id)
                 break;
 
-            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+            if (x + i >= width || y + i >= width || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
@@ -128,15 +132,16 @@ void updatesand(int x, int y, world_data &w)
 
 void updatewater(int x, int y, world_data &w)
 {
-#define water_flow 40
-    if (x >= 640 || y >= 480)
+#define water_flow 30
+    if (x >= width - 1 || y >= height - 1)
         return;
 
     particle this_particle = w.readParticle(x, y);
     particle below = w.readParticle(x, y + 1);
 
     this_particle.acc = e->gravity;
-    this_particle.vel += this_particle.acc * dt / 2;
+    if (this_particle.vel < 15)
+        this_particle.vel += this_particle.acc * dt;
 
     if (below.id == empty_id)
     {
@@ -147,7 +152,7 @@ void updatewater(int x, int y, world_data &w)
         {
             if (w.readParticle(x, y + i).id != 0)
                 break;
-            if (x + i >= 640 || y + i >= 480)
+            if (x + i >= width - 1 || y + i >= height - 1)
                 break;
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x, y + i, water_id, this_particle.vel, this_particle.acc);
@@ -167,7 +172,7 @@ void updatewater(int x, int y, world_data &w)
             if (w.readParticle(x - i, y + i).id != 0)
                 break;
 
-            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+            if (x + i >= width - 1 || y + i >= height - 1 || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
@@ -189,7 +194,7 @@ void updatewater(int x, int y, world_data &w)
             if (w.readParticle(x + i, y + i).id != empty_id)
                 break;
 
-            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+            if (x + i >= width - 1 || y + i >= height - 1 || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
@@ -206,15 +211,15 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 1; i <= water_flow; i++)
+        for (int i = 1; i < water_flow; i++)
         {
             if (w.readParticle(x - i, y).id != empty_id)
                 break;
-            if (x + i >= 640 || x - i <= 0)
+            if (x + i >= width - 1 || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id);
-            w.updateParticle(x - i, y, water_id, 0, 0, water_flow);
+            w.updateParticle(x - i, y, water_id, 0, 0);
             prevx = x - i;
             prevy = y;
         }
@@ -226,15 +231,15 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 1; i <= water_flow; i++)
+        for (int i = 1; i < water_flow; i++)
         {
             if (w.readParticle(x + i, y).id != empty_id)
                 break;
-            if (x + i >= 640 || x - i <= 0)
+            if (x + i >= width - 1 || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id);
-            w.updateParticle(x + i, y, water_id, 0, 0, water_flow);
+            w.updateParticle(x + i, y, water_id, 0, 0);
             prevx = x + i;
             prevy = y;
         }
@@ -264,9 +269,9 @@ int main(int argc, char **argv)
         }
         e->update(handle_Input, copyTex);
         int ran = frame_number % 2;
-        for (int y = 480 - 1; y > 0; y--)
+        for (int y = height - 1; y > 0; y--)
         {
-            for (int x = ran ? 0 : 640 - 1; ran ? x < 640 : x > 0; ran ? ++x : --x)
+            for (int x = ran ? 0 : width - 1; ran ? x < width : x > 0; ran ? ++x : --x)
             {
                 uint32_t id = w.readParticle(x, y).id;
 
