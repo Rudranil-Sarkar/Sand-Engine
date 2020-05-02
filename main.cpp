@@ -61,7 +61,7 @@ void updatesand(int x, int y, world_data &w)
 
     this_particle.acc = e->gravity;
     this_particle.vel += this_particle.acc * dt / 2;
-    if (below.id == 0)
+    if (below.id == empty_id)
     {
         int prevx = x;
         int prevy = y;
@@ -73,7 +73,7 @@ void updatesand(int x, int y, world_data &w)
             if (x + i >= 640 || y + i >= 480)
                 break;
 
-            w.updateParticle(prevx, prevy, 0, 0, 0);
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x, y + i, sand_id, this_particle.vel, this_particle.acc);
             prevx = x;
             prevy = y + i;
@@ -83,7 +83,7 @@ void updatesand(int x, int y, world_data &w)
 
     particle below_left = w.readParticle(x - 1, y + 1);
 
-    if (below_left.id == 0)
+    if (below_left.id == empty_id)
     {
         int prevx = x;
         int prevy = y;
@@ -95,7 +95,7 @@ void updatesand(int x, int y, world_data &w)
             if (x + i >= 640 || y + i >= 480 || x - i <= 0)
                 break;
 
-            w.updateParticle(prevx, prevy, 0, 0, 0);
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x - i, y + i, sand_id, this_particle.vel, this_particle.acc);
             prevx = x - i;
             prevy = y + i;
@@ -105,19 +105,19 @@ void updatesand(int x, int y, world_data &w)
 
     particle below_right = w.readParticle(x + 1, y + 1);
 
-    if (below_right.id == 0)
+    if (below_right.id == empty_id)
     {
         int prevx = x;
         int prevy = y;
         for (int i = 1; i < this_particle.vel; i++)
         {
-            if (w.readParticle(x + i, y + i).id != 0)
+            if (w.readParticle(x + i, y + i).id != empty_id)
                 break;
 
             if (x + i >= 640 || y + i >= 480 || x - i <= 0)
                 break;
 
-            w.updateParticle(prevx, prevy, 0, 0, 0);
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x + i, y + i, sand_id, this_particle.vel, this_particle.acc);
             prevx = x + i;
             prevy = y + i;
@@ -126,8 +126,125 @@ void updatesand(int x, int y, world_data &w)
     }
 }
 
+void updatewater(int x, int y, world_data &w)
+{
+#define water_flow 40
+    if (x >= 640 || y >= 480)
+        return;
+
+    particle this_particle = w.readParticle(x, y);
+    particle below = w.readParticle(x, y + 1);
+
+    this_particle.acc = e->gravity;
+    this_particle.vel += this_particle.acc * dt / 2;
+
+    if (below.id == empty_id)
+    {
+        int prevx = x;
+        int prevy = y;
+
+        for (int i = 1; i < this_particle.vel; i++)
+        {
+            if (w.readParticle(x, y + i).id != 0)
+                break;
+            if (x + i >= 640 || y + i >= 480)
+                break;
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
+            w.updateParticle(x, y + i, water_id, this_particle.vel, this_particle.acc);
+            prevx = x;
+            prevy = y + i;
+        }
+        return;
+    }
+    particle below_left = w.readParticle(x - 1, y + 1);
+
+    if (below_left.id == empty_id)
+    {
+        int prevx = x;
+        int prevy = y;
+        for (int i = 1; i < this_particle.vel; i++)
+        {
+            if (w.readParticle(x - i, y + i).id != 0)
+                break;
+
+            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+                break;
+
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
+            w.updateParticle(x - i, y + i, water_id, this_particle.vel, this_particle.acc);
+            prevx = x - i;
+            prevy = y + i;
+        }
+        return;
+    }
+
+    particle below_right = w.readParticle(x + 1, y + 1);
+
+    if (below_right.id == empty_id)
+    {
+        int prevx = x;
+        int prevy = y;
+        for (int i = 1; i < this_particle.vel; i++)
+        {
+            if (w.readParticle(x + i, y + i).id != empty_id)
+                break;
+
+            if (x + i >= 640 || y + i >= 480 || x - i <= 0)
+                break;
+
+            w.updateParticle(prevx, prevy, empty_id, 0, 0);
+            w.updateParticle(x + i, y + i, water_id, this_particle.vel, this_particle.acc);
+            prevx = x + i;
+            prevy = y + i;
+        }
+        return;
+    }
+
+    particle left = w.readParticle(x - 1, y);
+
+    if (left.id == empty_id)
+    {
+        int prevx = x;
+        int prevy = y;
+        for (int i = 1; i <= water_flow; i++)
+        {
+            if (w.readParticle(x - i, y).id != empty_id)
+                break;
+            if (x + i >= 640 || x - i <= 0)
+                break;
+
+            w.updateParticle(prevx, prevy, empty_id);
+            w.updateParticle(x - i, y, water_id, 0, 0, water_flow);
+            prevx = x - i;
+            prevy = y;
+        }
+        return;
+    }
+    particle right = w.readParticle(x + 1, y);
+
+    if (right.id == empty_id)
+    {
+        int prevx = x;
+        int prevy = y;
+        for (int i = 1; i <= water_flow; i++)
+        {
+            if (w.readParticle(x + i, y).id != empty_id)
+                break;
+            if (x + i >= 640 || x - i <= 0)
+                break;
+
+            w.updateParticle(prevx, prevy, empty_id);
+            w.updateParticle(x + i, y, water_id, 0, 0, water_flow);
+            prevx = x + i;
+            prevy = y;
+        }
+        return;
+    }
+}
+
 int main(int argc, char **argv)
 {
+    int frame_number = 0;
     while (e->running)
     {
         LAST = NOW;
@@ -137,18 +254,19 @@ int main(int argc, char **argv)
 
         if (leftMouseButtonDown)
         {
-            w.updateParticle(mouseX, mouseY, sand_id, 0, 0);
-            w.updateParticle(mouseX + 1, mouseY - 3, sand_id, 0, 0);
-            w.updateParticle(mouseX + 2, mouseY - 2, sand_id, 0, 0);
-            w.updateParticle(mouseX + 3, mouseY - 1, sand_id, 0, 0);
-            w.updateParticle(mouseX - 1, mouseY + 3, sand_id, 0, 0);
-            w.updateParticle(mouseX - 2, mouseY + 2, sand_id, 0, 0);
-            w.updateParticle(mouseX - 3, mouseY + 1, sand_id, 0, 0);
+            w.updateParticle(mouseX, mouseY, water_id, 0, 0);
+            w.updateParticle(mouseX + 1, mouseY - 3, water_id, 0, 0);
+            w.updateParticle(mouseX + 2, mouseY - 2, water_id, 0, 0);
+            w.updateParticle(mouseX + 3, mouseY - 1, water_id, 0, 0);
+            w.updateParticle(mouseX - 1, mouseY + 3, water_id, 0, 0);
+            w.updateParticle(mouseX - 2, mouseY + 2, water_id, 0, 0);
+            w.updateParticle(mouseX - 3, mouseY + 1, water_id, 0, 0);
         }
         e->update(handle_Input, copyTex);
+        int ran = frame_number % 2;
         for (int y = 480 - 1; y > 0; y--)
         {
-            for (int x = 1; x < 640; x++)
+            for (int x = ran ? 0 : 640 - 1; ran ? x < 640 : x > 0; ran ? ++x : --x)
             {
                 uint32_t id = w.readParticle(x, y).id;
 
@@ -156,13 +274,13 @@ int main(int argc, char **argv)
                 {
                 case sand_id:
                     updatesand(x, y, w);
-                    break;
 
-                default:
-                    break;
+                case water_id:
+                    updatewater(x, y, w);
                 }
             }
         }
+        frame_number++;
     }
 
     delete e;

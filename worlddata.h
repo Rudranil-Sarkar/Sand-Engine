@@ -12,12 +12,13 @@ private:
 public:
     particle *p;
     world_data(int width, int height);
-    void updateParticle(int x, int y, uint32_t id, int vel, int acc)
+    void updateParticle(int x, int y, uint32_t id, int vel = 0, int acc = 0, int flowrate = 0)
     {
         particle t;
         t.id = id;
         t.vel = vel;
         t.acc = acc;
+        t.flowrate = flowrate;
         p[x + y * _w] = t;
     }
 
