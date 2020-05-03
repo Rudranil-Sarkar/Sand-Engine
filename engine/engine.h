@@ -16,7 +16,7 @@ public:
     SDL_Event event;
     uint32_t *pixels;
     bool running = true;
-    float gravity = 5.f;
+    float gravity = 3.f;
 
 public:
     engine(int _w, int _h);

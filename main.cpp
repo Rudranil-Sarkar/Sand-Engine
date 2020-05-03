@@ -157,7 +157,7 @@ void updatesand(int x, int y, world_data &w)
 
 void updatewater(int x, int y, world_data &w)
 {
-#define water_flow 400
+#define water_flow 10
     if (x >= width - 1 || y >= height - 1)
         return;
 
@@ -303,7 +303,7 @@ void updatewater(int x, int y, world_data &w)
 int main(int argc, char **argv)
 {
     int frame_number = 0;
-    uint32_t selected_particle = water_id;
+    uint32_t selected_particle = wood_id;
     while (e->running)
     {
         LAST = NOW;
@@ -341,6 +341,22 @@ int main(int argc, char **argv)
 
         if (leftMouseButtonDown)
         {
+            if (selected_particle == wood_id || selected_particle == empty_id)
+            {
+                float radius = 10.f;
+                for (int i = -radius; i < radius; ++i)
+                {
+                    for (int j = -radius; j < radius; ++j)
+                    {
+                        int rx = mouseX + j;
+                        int ry = mouseY + i;
+
+                        float dist = sqrt(((ry - mouseY) * (ry - mouseY)) + ((rx - mouseX) * (rx - mouseX)));
+                        if (dist <= radius)
+                            w.updateParticle(rx, ry, selected_particle);
+                    }
+                }
+            }
             int r_amt = random_value(10, 100);
 
             for (int i = 0; i < r_amt; ++i)
