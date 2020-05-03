@@ -7,7 +7,7 @@ world_data::world_data(int width, int height) : _w(width), _h(height), p(new par
         for (int x = 0; x < _w; x++)
         {
             particle t;
-            t.id = 0;
+            t.id = empty_id;
             t.vel = 0;
             t.acc = 0;
             p[x + y * _w] = t;
