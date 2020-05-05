@@ -8,8 +8,8 @@ Uint64 NOW = SDL_GetPerformanceCounter();
 Uint64 LAST = 0;
 double dt = 0;
 
-int width = 1280;
-int height = 720;
+int width = 640;
+int height = 480;
 
 world_data w(width, height);
 
@@ -85,7 +85,7 @@ void updatesand(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
             if (x + i >= width || y + i >= height)
                 break;
@@ -110,7 +110,7 @@ void updatesand(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
             if (x + i >= width || y + i >= height || x - i <= 0)
                 break;
@@ -135,7 +135,7 @@ void updatesand(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
             if (x + i >= width || y + i >= height || x - i <= 0)
                 break;
@@ -157,7 +157,7 @@ void updatesand(int x, int y, world_data &w)
 
 void updatewater(int x, int y, world_data &w)
 {
-#define water_flow 10
+#define water_flow 5
     if (x >= width - 1 || y >= height - 1)
         return;
 
@@ -177,20 +177,22 @@ void updatewater(int x, int y, world_data &w)
         int prevx = x;
         int prevy = y;
 
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
             if (x + i >= width - 1 || y + i >= height - 1)
                 break;
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x, y + i, water_id, this_particle.vel, this_particle.acc);
+            w.readParticle(prevx, prevy).has_updated = false;
             prevx = x;
             prevy = y + i;
             if (w.readParticle(x, y + i + 1).id != empty_id)
-            {
-                w.readParticle(prevx, prevy).vel /= 2;
+            { 
+		this_particle.vel /= 2;
                 break;
             }
         }
+        w.readParticle(x, y).has_updated = false;
         w.readParticle(prevx, prevy).has_updated = true;
         return;
     }
@@ -200,7 +202,7 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
 
             if (x + i >= width - 1 || y + i >= height - 1 || x - i <= 0)
@@ -208,14 +210,16 @@ void updatewater(int x, int y, world_data &w)
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x - i, y + i, water_id, this_particle.vel, this_particle.acc);
+            w.readParticle(prevx, prevy).has_updated = false;
             prevx = x - i;
             prevy = y + i;
             if (w.readParticle(x - i - 1, y + i + 1).id != empty_id)
             {
-                w.readParticle(prevx, prevy).vel /= 2;
+		this_particle.vel /= 2;
                 break;
             }
         }
+        w.readParticle(x, y).has_updated = false;
         w.readParticle(prevx, prevy).has_updated = true;
         return;
     }
@@ -226,7 +230,7 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < this_particle.vel; i++)
+        for (int i = 0; i <= this_particle.vel; i++)
         {
 
             if (x + i >= width - 1 || y + i >= height - 1 || x - i <= 0)
@@ -234,14 +238,16 @@ void updatewater(int x, int y, world_data &w)
 
             w.updateParticle(prevx, prevy, empty_id, 0, 0);
             w.updateParticle(x + i, y + i, water_id, this_particle.vel, this_particle.acc);
+            w.readParticle(prevx, prevy).has_updated = false;
             prevx = x + i;
             prevy = y + i;
             if (w.readParticle(x + i + 1, y + i + 1).id != empty_id)
             {
-                w.readParticle(prevx, prevy).vel /= 2;
+		this_particle.vel /= 2;
                 break;
             }
         }
+        w.readParticle(x, y).has_updated = false;
         w.readParticle(prevx, prevy).has_updated = true;
         return;
     }
@@ -255,7 +261,7 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < water_flow; i++)
+        for (int i = 0; i <= water_flow; i++)
         {
 
             if (x + i >= width - 1 || x - i <= 0)
@@ -263,14 +269,15 @@ void updatewater(int x, int y, world_data &w)
 
             w.updateParticle(prevx, prevy, empty_id);
             w.updateParticle(x - i, y, water_id, this_particle.vel / 2, 0);
+            w.readParticle(prevx, prevy).has_updated = false;
             prevx = x - i;
             prevy = y;
             if (w.readParticle(x - i - 1, y).id != empty_id)
             {
-                w.readParticle(prevx, prevy).vel = 0;
                 break;
             }
         }
+        w.readParticle(x, y).has_updated = false;
         w.readParticle(prevx, prevy).has_updated = true;
         return;
     }
@@ -280,13 +287,14 @@ void updatewater(int x, int y, world_data &w)
     {
         int prevx = x;
         int prevy = y;
-        for (int i = 0; i < water_flow; i++)
+        for (int i = 0; i <= water_flow; i++)
         {
             if (x + i >= width - 1 || x - i <= 0)
                 break;
 
             w.updateParticle(prevx, prevy, empty_id);
             w.updateParticle(x + i, y, water_id, this_particle.vel / 2, 0);
+            w.readParticle(prevx, prevy).has_updated = false;
             prevx = x + i;
             prevy = y;
             if (w.readParticle(x + i + 1, y).id != empty_id)
@@ -295,6 +303,7 @@ void updatewater(int x, int y, world_data &w)
                 break;
             }
         }
+        w.readParticle(x, y).has_updated = false;
         w.readParticle(prevx, prevy).has_updated = true;
         return;
     }
@@ -378,7 +387,7 @@ int main(int argc, char **argv)
         }
         e->update(handle_Input, copyTex);
         int ran = frame_number % 2;
-        for (int y = height - 1; y > 0; y--)
+        for (int y = 0; y < height - 1; y++)
         {
             for (int x = ran ? 0 : width - 1; ran ? x < width : x > 0; ran ? ++x : --x)
             {
@@ -398,6 +407,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        copyTex();
         frame_number++;
     }
 

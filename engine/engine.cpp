@@ -28,7 +28,7 @@ void engine::update(void (*handle_Input)(SDL_Event &, bool &), void (*copyTex)()
 {
 
     handle_Input(event, running);
-    copyTex();
+    // copyTex();
 
     SDL_UpdateTexture(tex, NULL, pixels, width * sizeof(uint32_t));
 

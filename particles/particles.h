@@ -16,7 +16,7 @@ enum par_id
     empty_id = 0xFF282828,
     sand_id = 0xFFFFDB58,
     water_id = 0xFF2e6598,
-    wood_id = 0xFFA52A2A
+    wood_id = 0xFF8B4513
 };
 
 #endif
